@@ -22,10 +22,12 @@ def get_spark_session(app_name="sales-etl-pyspark"):
     os.dup2(devnull_fd, 2)
     try:
         return (
-            SparkSession.builder
-            .appName(app_name)
+            SparkSession.builder.appName(app_name)
             .config("spark.log.level", "ERROR")
-            .config("spark.driver.extraJavaOptions", f"-Dlog4j2.configurationFile={log4j_url}")
+            .config(
+                "spark.driver.extraJavaOptions",
+                f"-Dlog4j2.configurationFile={log4j_url}",
+            )
             .getOrCreate()
         )
     finally:
