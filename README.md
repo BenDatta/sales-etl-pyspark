@@ -11,14 +11,7 @@ End-to-end sales data pipeline built with PySpark, Apache Airflow, and PostgreSQ
 ---
 
 ## What was built
-
-Raw sales CSV data is ingested, cleaned, and loaded into a PostgreSQL database through a three-task Airflow DAG: **extract → transform → load**.
-
-**Extract** — PySpark reads raw CSV files from `/data/raw/` and writes them to a Parquet staging area. Parquet was chosen for its columnar format, schema enforcement, and efficiency for downstream transforms.
-
-**Transform** — PySpark applies schema enforcement, type casting, and column normalisation. Output lands in `/data/staging/transformed/` as clean Parquet, fully decoupled from the extract step so either can be re-run independently.
-
-**Load** — 32,718 rows are upserted into `sales_db.sales` in PostgreSQL using `psycopg2`. The upsert strategy (`ON CONFLICT (sales_order_number, sales_order_line_number) DO UPDATE SET ...`) makes every run idempotent — safe to re-trigger without duplicates or failures.
+![Pipeline](./sales_etl.png)
 
 ---
 
@@ -43,9 +36,8 @@ sales-etl-pyspark/
 ├── dags/
 │   ├── main.py                     # DAG definition
 │   └── etl/
-│       ├── extract_data.py
-│       ├── transform_data.py
-│       └── load_data_postgres.py
+│       ├── extract_transform.py
+│       └── load_data.py
 ├── data/
 │   ├── raw/
 │   └── staging/transformed/
