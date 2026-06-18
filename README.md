@@ -10,8 +10,35 @@ End-to-end sales data pipeline built with PySpark, Apache Airflow, and PostgreSQ
 
 ---
 
-## What was built
+## Data Pipeline
+
 ![Pipeline](./sales_etl.png)
+
+---
+
+## ETL Workflow
+
+### Extract
+- Reads raw sales CSV data using PySpark.
+- Stores data in a Parquet staging layer for efficient downstream processing.
+- Ingests 32,718 sales records.
+
+### Transform
+PySpark applies:
+- Data type enforcement and casting:
+  - `Quantity` → Integer
+  - `SalesOrderLineNumber` → Integer
+  - `OrderDate` → Date
+  - `UnitPrice` → Float
+  - `TaxAmount` → Float
+- Column standardisation (`CamelCase` → `snake_case`).
+- Date enrichment: `order_year`, `order_month`, `order_day`.
+- Writes the cleaned dataset back to a transformed Parquet layer.
+
+### Load
+- Reads transformed Parquet data.
+- Loads records into PostgreSQL (`sales_db.sales`).
+- Uses an UPSERT strategy with `ON CONFLICT` to ensure idempotent loads and prevent duplicate records.
 
 ---
 
@@ -19,7 +46,7 @@ End-to-end sales data pipeline built with PySpark, Apache Airflow, and PostgreSQ
 
 | Layer | Tool |
 |---|---|
-| Orchestration | Apache Airflow 3.x — CeleryExecutor |
+| Orchestration | Apache Airflow 3.2.2|
 | Processing | PySpark |
 | Storage | PostgreSQL |
 | Containerisation | Docker Compose |
@@ -28,7 +55,6 @@ End-to-end sales data pipeline built with PySpark, Apache Airflow, and PostgreSQ
 | Language | Python 3.13 |
 
 ---
-
 ## Project structure
 
 ```
@@ -47,17 +73,4 @@ sales-etl-pyspark/
 ├── docker-compose.yaml
 └── requirements.txt
 ```
-
----
-
-## Key design decisions
-
-**PySpark for ~32K rows** — designed for scalability. The same pipeline handles millions of rows without code changes by adjusting the Spark cluster config.
-
-**Parquet staging layer** — decouples extract and transform. Either step can be re-run without re-processing the other.
-
-**Upsert over truncate-and-load** — no data loss on partial failures. Re-triggering the DAG always produces the correct final state.
-
-**Environment via Docker** — all credentials injected through `docker-compose --env-file .env`, keeping secrets out of the codebase entirely.
-
 ---
