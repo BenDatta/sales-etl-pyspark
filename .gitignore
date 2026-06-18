@@ -1,9 +1,7 @@
 log4j2-quiet.properties
 .spark_venv/
 .env
-.env.example
 spark_session.py
 plugins/
 logs/
 __pycache__
-load_data_postgres.py
