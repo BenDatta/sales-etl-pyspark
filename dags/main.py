@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 from airflow import DAG  # type:ignore
 from airflow.operators.python import PythonOperator  # type:ignore
 
-from etl.sales_etl import run_ingest, run_transform
-from etl.load_data_postgres import load_data_postgres
+from etl.extract_transform import run_ingest, run_transform
+from etl.load_data import load_data_postgres
 
 default_args = {
     "owner": "data_engineering_team",
